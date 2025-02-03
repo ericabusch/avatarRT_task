@@ -1,0 +1,4 @@
+﻿RoundNumber,LevelNumber,RoundStartTime,RoundEndTime,Noisy,UsingClient,MoveMode,Difficulty,ErrorRate
+0,2,0,0,0,0,ScannerMove,0,0
+RoundNumber,LevelNumber,RoundStartTime,RoundEndTime,Noisy,UsingClient,MoveMode,Difficulty,ErrorRate
+0,2,0,0,0,0,ScannerMove,0,0

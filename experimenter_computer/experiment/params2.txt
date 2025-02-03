@@ -1,0 +1,8 @@
+avatarRT_sub_ABC
+2
+1
+/Users/elb/Desktop/BCI/avatarRT_task/experimenter_computer/experiment/subjects/avatarRT_sub_ABC/ses_02/run_001/
+ScannerMove
+5
+0
+False

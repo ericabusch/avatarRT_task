@@ -1,0 +1,9 @@
+avatarRT_sub_25
+4
+1
+/home/watts/Desktop/ntblab/erica//rt-cloud/projects/avatarRT/experiment/subjects/avatarRT_sub_25/ses_04/behav/run_004/
+ScannerMove
+5
+1
+True
+None

@@ -19,7 +19,7 @@ public class InfoSetter : MonoBehaviour
     private float timerToConnect = 0f;
     private float timeout = 30f;
     private int TOTAL_CALIB = 10; // the number of TRs that will be used for calibration
-    private bool GotFinalEnd;
+    private bool GotFinalEnd; // ends run not round
     // Use this for initialization
     void Start()
     {
@@ -75,7 +75,7 @@ public class InfoSetter : MonoBehaviour
 
         if (!levelController.usingClient)
         {
-            levelController.enabled = true;
+            levelController.enabled = true; // starts if we're not waiting to sync with python
         }
 
 

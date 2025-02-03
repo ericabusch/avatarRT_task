@@ -47,8 +47,6 @@ public class Landscaper : MonoBehaviour
             Instantiate(treeType1, boundaryPoints[i], Quaternion.identity, holder.transform);
 
         }
-
-
         holder.transform.parent = gameObject.transform;
         LandscapeFeatures = new List<GameObject>();
         SetUpArena();
@@ -87,8 +85,7 @@ public class Landscaper : MonoBehaviour
         xMin = North.transform.position.x;
         xMax = East.transform.position.x;
         zMax = North.transform.position.z;
-        zMin = South.transform.position.z;
-
+        zMin = South.transform.position.z; 
         corners.Add("xMin", xMin);
         corners.Add("xMax", xMax);
         corners.Add("zMin", zMin);
@@ -121,11 +118,8 @@ public class Landscaper : MonoBehaviour
         {
             float xloc = UnityEngine.Random.Range(xMin, xMax);
             float zloc = UnityEngine.Random.Range(zMin, zMax);
-
             Vector3 vec = new Vector3(xloc, 0.5f, zloc);
-
             List<Vector3> NoZone = new List<Vector3>();
-
             objectPoints.Add(Vector3.Scale(vec, new Vector3(1f, 0f, 1f)));
         }
     }
@@ -141,12 +135,12 @@ public class Landscaper : MonoBehaviour
             Vector3 loc = objectPoints[x];
             bool CHOOSE = true;
 
+            // decide if it's too close to other things or to the path to render
             for (int c = 0; c < RewardLocations.Count; c++)
             {
                 if (Vector3.Distance(loc, RewardLocations[c]) < dist)
                 {
                     CHOOSE = false;
-                    //print(string.Format("did not render {0}; distance {1}", loc.ToString(), Vector3.Distance(loc, RewardLocations[c]).ToString()));
                 }
             }
 

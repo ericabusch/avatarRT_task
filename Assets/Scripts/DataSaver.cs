@@ -8,7 +8,6 @@ using System.IO;
 public class DataSaver : MonoBehaviour
 {
     public string outpath; // this is where you will save all info at the end of the round
-    public StatTracker theseStats;
     private int BufferSize = 65536;
     public Client thisClient;
     public Dictionary<float, Vector3> Positions;

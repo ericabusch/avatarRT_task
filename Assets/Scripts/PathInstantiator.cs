@@ -43,7 +43,7 @@ public class PathInstantiator : MonoBehaviour
 
     private List<Vector3> generatePoints(Vector3 startPos, int nPoints, float dist, bool noisy)
     {
-
+        // generates a list of waypoints on the pat from the start to the final loc
         points = new List<Vector3>();
         points.Add(startPos);
 

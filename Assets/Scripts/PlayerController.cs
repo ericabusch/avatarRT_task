@@ -12,7 +12,7 @@ public class PlayerController : MonoBehaviour
     public Animator anim;
     public Collider col;
     public Rigidbody rb;
-    public string commPath; // can be for either scanner comm or joystick comm
+    public string commPath; 
     public LineRenderer line;
     private Vector3[] linePositions;
     public PathInstantiator pathInstance;
@@ -39,19 +39,15 @@ public class PlayerController : MonoBehaviour
 
     #region Variables interfacing with the animator
     [Header("Animation Speed Settings")]
-    public float WALK_SPEED = 100f; // this is what's being adjusted constantly
-    // WHAT DO ANY OF THESE SPECIFICALLY DO TO THE MOTION
+    public float WALK_SPEED = 100f; 
     public float ROTATE_DEGREES = 180f; // rotate this amount
-    public float SMOOTH_TIME = 0.5f; // over ths amount of time
-    public float VELOCITY = 1f; // DONT TOUCH THIS
+    public float SMOOTH_TIME = 0.5f; 
+    public float VELOCITY = 1f; 
     #endregion
 
     public float startTime;
     public bool RoundEnd;
     public bool DidTimeout;
-
-    //public delegate void TriggerCallback(bool GOOD);
-    //public TriggerCallback ScoreCallback;
 
     public delegate MovementOutput MoveDelegate(float A, float B);
     public MoveDelegate PlayerMovement;
@@ -90,6 +86,7 @@ public class PlayerController : MonoBehaviour
 
     void CheckPoint()
     {
+        // check where we're at, see if at goal
         startPos = transform.position;
         currentPosHolder = PointPath[currentPoint];
     }
@@ -117,11 +114,11 @@ public class PlayerController : MonoBehaviour
         float DeltaDecoded = PreviousMovement.DecodedAngle - CurrentMovement.DecodedAngle;
         float DeltaV = PreviousMovement.Input_V - CurrentMovement.Input_V;
 
-        if (DeltaDecoded != 0)
+        if (DeltaDecoded != 0) // if we have a new decoded angle
         {
-            FacingDirections.Add(Time.time, CurrentFacingDirection);
-        }
-        if (DeltaPosition > 0.008)
+            FacingDirections.Add(Time.time, CurrentFacingDirection); // record it
+        } 
+        if (DeltaPosition > 0.008) // if we've moved more than what would be expected by sway
         {
             Positions.Add(Time.time, CurrentPosition);
             RunningMovementSum += DeltaPosition;
@@ -129,7 +126,7 @@ public class PlayerController : MonoBehaviour
         }
         PreviousMovement = CurrentMovement;
         // check if we're at the end
-        if (Vector3.Distance(CurrentPosition, FLAG_LOCATION) < 2f) // gets very very close to flag
+        if (Vector3.Distance(CurrentPosition, FLAG_LOCATION) < 2f) // very close to flag
         {
             RoundEnd = true;
             MovementError = CalculateMovementError(RunningMovementSum, StartPosition, CurrentPosition);
@@ -142,7 +139,7 @@ public class PlayerController : MonoBehaviour
 
         MinimumDistance = Vector3.Distance(StartPosition, EndPosition);
         float abs_error = ActualDistanceTraveled - MinimumDistance;
-        float error = abs_error / MinimumDistance;
+        float error = abs_error / MinimumDistance; // normalize error at end of run 
         //print(string.Format("Error: {0} | actual:{1} | ideal: {2} | threshold: {3}", error, ActualDistanceTraveled, MinimumDistance, ErrorThreshold));
         return error;
     }
@@ -247,8 +244,8 @@ public class PlayerController : MonoBehaviour
         float error = decodedAngle * confidence * 90f; 
         // take the ideal and rotate toward the offset 
         rotation *= Quaternion.Euler(0f, error, 0f); 
-        print(string.Format("Decoded angle: {0}, Confidence: {1}, initial position: {2}", decodedAngle, confidence, position));
-        print(string.Format("Error: {0}, rotation: {1}, lookPos: {2}", error, rotation, lookPos));
+        //print(string.Format("Decoded angle: {0}, Confidence: {1}, initial position: {2}", decodedAngle, confidence, position));
+        //print(string.Format("Error: {0}, rotation: {1}, lookPos: {2}", error, rotation, lookPos));
         return rotation;
     }
 

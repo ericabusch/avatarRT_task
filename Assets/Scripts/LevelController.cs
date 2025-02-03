@@ -29,8 +29,8 @@ public class LevelController : MonoBehaviour
     public int maxSuccesses;
     public int maxRounds = 100;
     public float ErrorThreshold = 0.1f;
-    public int score; // cuurrent score
-    public float timeAllowed = 60f; // put baakcto 60
+    public int score; // current score
+    public float timeAllowed = 60f; // increases with rounds
     public float lim = 100f;
     public bool playMode;
     public bool pause;
@@ -42,7 +42,7 @@ public class LevelController : MonoBehaviour
     public string MoveMode = null;
     public bool usingClient; // if using client, get input from files;  if not, use built-in
     public bool started;
-    public GameObject playerPrefab; // get the player
+    public GameObject playerPrefab; // get the player prefab
     private GameObject thisPlayer;
     public Vector3 startPosition;
     private bool QPressed;
@@ -121,6 +121,8 @@ public class LevelController : MonoBehaviour
     {
         timeAllowed += 10 * currentLevel;
         //print(string.Format("current calib TR : {0}", calib_TR));
+
+        // messages to show while waiting to start over 20 s 
         calibrationMessages = new Dictionary<int, string>();
         calibrationMessages.Add(0, "Waiting for input ... ");
         calibrationMessages.Add(1, "Your goal is to make the avatar move toward the flag using your brain.");
@@ -133,6 +135,7 @@ public class LevelController : MonoBehaviour
         calibrationMessages.Add(8, string.Format("Game {0} starts in {1}", currentLevel, 2));
         calibrationMessages.Add(9, string.Format("Game {0} starts in {1}", currentLevel, 1));
         calibrationMessages.Add(10, string.Format("Game {0} starts in {1}", currentLevel, 0));
+        //
 
         DistanceErrorRates = new List<float>();
         messageText.text = "";
@@ -190,26 +193,21 @@ public class LevelController : MonoBehaviour
 
         thisLandscape = Instantiate(landscapePrefab, startPosition, Quaternion.identity);
         landscaper = thisLandscape.GetComponent<Landscaper>();
-        if (difficulty > 10)
-        {
-            landscaper.dist = 1;
-        }
+
+        if (difficulty > 10){ landscaper.dist = 1; }
         else { landscaper.dist = 2; }
 
-        landscaper.maxObjects = difficulty * 50 + 25;
+        landscaper.maxObjects = difficulty * 50 + 25; // decide how many obstacles to throw around , locations will be revised accordingly
         pathInstance.corners = landscaper.corners;
         pathInstance.enabled = false;
         pathInstance.nWayPoints = maxSuccesses;
         pathInstance.corners = landscaper.corners;
         pathInstance.startPos = startPosition + new Vector3(1f, 0, 1f);
-        pathInstance.noisy = noisyLevel;
-
+        pathInstance.noisy = noisyLevel; 
         pathInstance.enabled = true;
-        landscaper.RewardLocations = pathInstance.points;
-
+        landscaper.RewardLocations = pathInstance.points; 
         playerScript.enabled = false;
-        playerScript.PointPath = pathInstance.points;
-
+        playerScript.PointPath = pathInstance.points; 
         flagLocation = pathInstance.points[pathInstance.points.Count - 1];
         MakeTarget(flagLocation);
         playerScript.FLAG_LOCATION = flagLocation;
@@ -230,7 +228,7 @@ public class LevelController : MonoBehaviour
 
     void StartPlay()
     {
-        OutgoingMessage = String.Format("Begin_{0}_{1}", currentRound, Time.time);
+        OutgoingMessage = String.Format("Begin_{0}_{1}", currentRound, Time.time); // sends a message back to python with the starting timer
         roundStartTime = Time.time;
         roundWinnerText.text = "";
         messageText.text = "";
@@ -259,7 +257,6 @@ public class LevelController : MonoBehaviour
         {
             StartAutomove();
         }
-        //OutgoingMessage = null;
     }
 
     bool readyToStart = false;
@@ -301,6 +298,7 @@ public class LevelController : MonoBehaviour
         }
         if (ReceivedQuit)
         {
+            // what to do when quit message is received
             QPressed = true;
             playerScript.RoundEnd = true;
             if (MoveMode != "ScannerMove")
@@ -331,11 +329,11 @@ public class LevelController : MonoBehaviour
             pause = true;
             float elapsed = Time.time - roundStartTime;
             string SecondString = "";
+            //gather information from player controller
             float CurrErrorRate = playerScript.MovementError;
             float IdealDistance = playerScript.MinimumDistance;
             float ObservedDistance = playerScript.RunningMovementSum;
             print(string.Format("Ideal: {0} | observed: {1} | Error: {2}", IdealDistance, ObservedDistance, CurrErrorRate));
-
             DeltaControl = 0;       // keeps track of if GameControl is going up (1), staying same (0), or going down (-1) -- this gets returned to python       
 
             // have we finished this level?
@@ -343,6 +341,7 @@ public class LevelController : MonoBehaviour
             {
                 FirstString = String.Format("Game {0} complete!\nRound {1} time elapsed: {2}", currentLevel, currentRound, elapsed.ToString());
                 toContinue = false;
+                // run ends
             }
 
             // look back over the window to get the average
@@ -358,7 +357,7 @@ public class LevelController : MonoBehaviour
                     //SecondString = string.Format("\nThis shortest path in this round is {0} steps.\nThis round took you {1} steps." +
                     //        " Great work!", IdealDistance.ToString("F0"), ObservedDistance.ToString("F0"));
 
-                    if ((perc > 25f) & (currentLevel > 1))
+                    if ((perc > 25f) & (currentLevel > 1)) // if it ever takes over 25% automatically fails
                     {
                         SecondString = string.Format("This round you took {0}% more steps than the shortest possible path.\nLeveling down!", Mathf.RoundToInt(perc));
                         DeltaControl = 1;
@@ -384,28 +383,27 @@ public class LevelController : MonoBehaviour
                     print(string.Format("average error {0}, current error {1}", RunningError, CurrErrorRate));
                     SecondString = string.Format("This round you took {0}% more steps than the shortest path.", Mathf.RoundToInt(perc));
 
-                    // prevent the running error from being too large, so that even a huge current error counts as a success - cap at 20%
+                    // prevent the running error from being too large, so that even a huge current error counts as a success - cap at 25%
                     if (RunningError > 0.25)
                     {
-                        print(string.Format("Running error was too big; capping it!"));
                         RunningError = 0.25f;
                         DeltaControl = 1;
                         SecondString += " You did worse than your record.\nLeveling down!";
                     }
-
-                    else if (CurrErrorRate < RunningError) // if theyre within 1% of each other
+                    // if improved
+                    else if (CurrErrorRate < RunningError)
                     {
                         DeltaControl = -1;
                         SecondString += " You beat your record!\nLeveling up.";
 
                     }
-
+                    // if very close, stay the same
                     else if (CurrErrorRate - RunningError < 0.002)
                     {
                         DeltaControl = 0;
                         SecondString += " You matched your record!";
                     }
-                    else // (CurrErrorRate - RunningError < 0)
+                    else  
                     {
                         DeltaControl = 1;
                         SecondString += " You did worse than your record.\nLeveling down!";
@@ -413,7 +411,7 @@ public class LevelController : MonoBehaviour
                 }
                 toContinue = true;
             }
-            // otherwise, we're overtime, and 
+            // otherwise, we're overtime, automatically lose 
             else
             {
                 FirstString = String.Format("Timed out in round {0}!\nLet's try again.", currentRound);
@@ -428,12 +426,10 @@ public class LevelController : MonoBehaviour
             roundWinnerText.enabled = true;
             roundWinnerText.text = FirstString;
             messageText.text = "";
-            //messageText.enabled = false;
             defaultCamera.enabled = true;
             pause = true;
             StartCoroutine(RoundFinishedScanner(toContinue, SecondString, CurrErrorRate)); // Start the co-routine
             playerScript.RoundEnd = false;
-            //Time.timeScale = 0;
             Time.timeScale = 1f;
             fileCounter = playerScript.fileCounter;
         }
@@ -447,9 +443,7 @@ public class LevelController : MonoBehaviour
         else
         {
             roundWinnerText.text = "";
-            //roundWinnerText.enabled = false;
             messageText.text = "";
-            //messageText.enabled = false;
             Time.timeScale = 1f;
             pause = false;
             playMode = true;
@@ -586,6 +580,7 @@ public class LevelController : MonoBehaviour
         {
             client = 1;
         }
+        // saves all this information out to file
         dataSaver.UsingClient = client;
         dataSaver.MoveMode = MoveMode;
         dataSaver.Positions = Positions;
@@ -593,14 +588,10 @@ public class LevelController : MonoBehaviour
         print(string.Format("Saving current level: {0}", currentLevelGame));
         dataSaver.CurrentLevelGame = currentLevelGame;
         dataSaver.SaveRound(currentRound);
-        //roundWinnerText.enabled = false;
-        //roundWinnerText.text = "";
-
         messageText.text = SecondString;
 
         if (Continue)
         {
-            //roundWinnerText.enabled = false;
             yield return new WaitForSeconds(1f);
             roundWinnerText.text = "";
 
@@ -626,7 +617,6 @@ public class LevelController : MonoBehaviour
             StartPlay();
             messageText.text = "";
             roundWinnerText.text = "";
-            //messageText.enabled = false;
             RestartRound = false;
 
         }
@@ -642,6 +632,7 @@ public class LevelController : MonoBehaviour
     {
         print("In coroutine");
         float completeTime = Time.time;
+        // sends message back to python
         if (Continue)
         {
             OutgoingMessage = String.Format("End_{0}_{1}", currentRound, completeTime);
@@ -657,8 +648,6 @@ public class LevelController : MonoBehaviour
         dataSaver.Boundaries = landscaper.boundaryPoints;
         dataSaver.Obstacles = landscaper.objectPoints;
         dataSaver.Targets = landscaper.RewardLocations;
-
-
         scorePanel.gameObject.SetActive(false);
         DestroyObjects();
         dataSaver.RoundStartTime = startTime;
@@ -681,6 +670,7 @@ public class LevelController : MonoBehaviour
         dataSaver.FacingDirections = FacingDirections;
         dataSaver.SaveRound(currentRound);
 
+        // countdown timer to next round
         if (Continue)
         {
             yield return new WaitForSeconds(1f);

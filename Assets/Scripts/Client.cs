@@ -9,14 +9,11 @@ using System.IO;
 
 public class Client : MonoBehaviour
 {
-    // Connection related variables
+    // TCP connection related variables
     private Thread mThread;
     string path = Directory.GetCurrentDirectory();
     public int messageCounter = 0;
-
     public string bicIP = "127.0.1.1";//"192.168.137.5"; //; // BIC IP -- check this with python! if there's an error, redo it.
-
-
     public string elbIP = "127.0.0.1"; // ELB IP
     public string connectionIP;
     public int connectionPort = 40000;
