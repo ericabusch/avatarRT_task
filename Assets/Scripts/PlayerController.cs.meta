@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 348fd92958a9e401abb9a367b6ad48b5
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - anim: {instanceID: 0}
+  - col: {instanceID: 0}
+  - rb: {instanceID: 0}
+  - line: {instanceID: 0}
+  - pathInstance: {instanceID: 0}
+  - targetPrefab: {fileID: 3591650080989756500, guid: fb6ce25c0de5248bc861f67b74d3808d,
+      type: 3}
+  - transformStorer: {fileID: 1088915580919690095, guid: a03d62b99e5194607ab9819a3f872919,
+      type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
